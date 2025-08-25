@@ -5,7 +5,7 @@ import torch
 import opt_einsum as oe
 
 
-def optcorr(x, y=None):
+def optcorr(x, y=None, min_cols_for_gpu=2500):
     """
     Compute columnwise correlations using Einstein summation notation.
     
@@ -16,6 +16,10 @@ def optcorr(x, y=None):
     y : np.ndarray, optional
         Second matrix of shape (n_samples, n_features_y)
         If None, computes correlation of x with itself
+    min_cols_for_gpu : int, optional
+        Minimum number of total columns to use GPU acceleration.
+        Below this threshold, falls back to numpy.corrcoef for better performance.
+        Default is 2500 based on empirical performance analysis.
     
     Returns
     -------
@@ -59,6 +63,11 @@ def optcorr(x, y=None):
     
     n_samples = x.shape[0]
     
+    # Check if we should use numpy for small matrices
+    total_cols = x.shape[1] + (0 if y is x else y.shape[1])
+    if total_cols < min_cols_for_gpu:
+        return _numpy_corrcoef(x, y)
+    
     # Detect available device
     device = _get_device()
     
@@ -101,6 +110,39 @@ def optcorr(x, y=None):
     result = corr.cpu().numpy()
     
     return result
+
+
+def _numpy_corrcoef(x, y=None):
+    """
+    Compute correlation using numpy.corrcoef for small matrices.
+    
+    Parameters
+    ----------
+    x : np.ndarray
+        First matrix
+    y : np.ndarray, optional
+        Second matrix for cross-correlation
+        
+    Returns
+    -------
+    np.ndarray
+        Correlation matrix
+    """
+    if y is None or y is x:
+        # Self-correlation
+        result = np.corrcoef(x.T)
+        # Handle single column case where corrcoef returns scalar
+        if result.ndim == 0:
+            result = np.array([[result]])
+        return result
+    else:
+        # Cross-correlation
+        full_corr = np.corrcoef(x.T, y.T)
+        if full_corr.ndim == 0:
+            # Single feature case
+            return np.array([[full_corr]])
+        n_x = x.shape[1]
+        return full_corr[:n_x, n_x:]
 
 
 def _get_device():

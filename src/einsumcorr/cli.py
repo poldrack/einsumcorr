@@ -35,6 +35,13 @@ def main():
         help="Delimiter for CSV files (default: comma)"
     )
     
+    parser.add_argument(
+        "--min-cols-for-gpu",
+        type=int,
+        default=2500,
+        help="Minimum number of columns to use GPU acceleration (default: 2500)"
+    )
+    
     args = parser.parse_args()
     
     # Show help if no arguments provided
@@ -52,7 +59,7 @@ def main():
             y = np.loadtxt(args.input2, delimiter=args.delimiter)
         
         # Compute correlation
-        result = optcorr(x, y)
+        result = optcorr(x, y, min_cols_for_gpu=args.min_cols_for_gpu)
         
         # Output results
         if args.output:

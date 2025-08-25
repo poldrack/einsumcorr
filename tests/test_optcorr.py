@@ -164,3 +164,30 @@ def test_deterministic_results():
     result2 = optcorr(x)
     
     np.testing.assert_array_equal(result1, result2)
+
+
+def test_min_cols_for_gpu_parameter():
+    """Test that min_cols_for_gpu parameter works correctly."""
+    np.random.seed(42)
+    x = np.random.randn(100, 10)
+    
+    # With default threshold (2500), should use numpy
+    result_default = optcorr(x)
+    
+    # With low threshold, should use GPU/einsum
+    result_gpu = optcorr(x, min_cols_for_gpu=5)
+    
+    # Results should be very similar regardless of backend
+    np.testing.assert_allclose(result_default, result_gpu, rtol=1e-5)
+    
+    # Both should be valid correlation matrices
+    assert result_default.shape == (10, 10)
+    assert result_gpu.shape == (10, 10)
+    
+    # Test with cross-correlation
+    y = np.random.randn(100, 8)
+    result_cross_default = optcorr(x, y)
+    result_cross_gpu = optcorr(x, y, min_cols_for_gpu=5)
+    
+    np.testing.assert_allclose(result_cross_default, result_cross_gpu, rtol=1e-5)
+    assert result_cross_default.shape == (10, 8)
