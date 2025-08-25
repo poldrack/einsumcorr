@@ -136,7 +136,8 @@ def test_comparison_with_numpy_two_matrices(sample_matrix_pair):
 
 def test_comparison_with_numpy_large_matrix(large_matrix):
     """Test that optcorr matches numpy.corrcoef for larger matrices."""
-    compare_with_numpy_corrcoef(large_matrix)
+    # Use slightly higher tolerance for larger matrices with float32 on MPS
+    compare_with_numpy_corrcoef(large_matrix, rtol=5e-4)
 
 
 def test_gpu_acceleration_if_available():
