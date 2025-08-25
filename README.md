@@ -2,6 +2,11 @@
 
 Efficient columnwise correlation computation using Einstein summation notation with GPU acceleration support.
 
+This module was primarily written as an example for by [Better Code, Better Science](https://poldrack.github.io/BetterCodeBetterScience/frontmatter.html) living textbook. 
+
+All code in this project was generated using Claude Code.  See [CLAUDE.md] for details.
+
+
 ## Features
 
 - Fast columnwise correlation using Einstein summation (einsum) notation
@@ -88,6 +93,3 @@ uv run pytest tests/test_performance.py -v -s
 - PyTorch >= 2.0.0
 - opt-einsum >= 3.3.0
 
-## License
-
-This project is part of the agentic-coding repository.
