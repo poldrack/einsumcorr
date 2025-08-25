@@ -17,7 +17,7 @@ def optcorr(x, y=None, min_cols_for_gpu=2500):
         Second matrix of shape (n_samples, n_features_y)
         If None, computes correlation of x with itself
     min_cols_for_gpu : int, optional
-        Minimum number of total columns to use GPU acceleration.
+        Minimum number of columns (max of x.shape[1] and y.shape[1]) to use GPU acceleration.
         Below this threshold, falls back to numpy.corrcoef for better performance.
         Default is 2500 based on empirical performance analysis.
     
@@ -64,9 +64,13 @@ def optcorr(x, y=None, min_cols_for_gpu=2500):
     n_samples = x.shape[0]
     
     # Check if we should use numpy for small matrices
-    total_cols = x.shape[1] + (0 if y is x else y.shape[1])
-    if total_cols < min_cols_for_gpu:
-        return _numpy_corrcoef(x, y)
+    max_cols = max(x.shape[1], y.shape[1])
+    if max_cols < min_cols_for_gpu:
+        # For single matrix case, don't pass y if it's the same as x
+        if y is x:
+            return _numpy_corrcoef(x)
+        else:
+            return _numpy_corrcoef(x, y)
     
     # Detect available device
     device = _get_device()

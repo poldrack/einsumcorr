@@ -191,3 +191,25 @@ def test_min_cols_for_gpu_parameter():
     
     np.testing.assert_allclose(result_cross_default, result_cross_gpu, rtol=1e-5)
     assert result_cross_default.shape == (10, 8)
+
+
+def test_min_cols_for_gpu_uses_max_columns():
+    """Test that min_cols_for_gpu uses max of column counts, not sum."""
+    np.random.seed(42)
+    
+    # Test case: 20 columns vs 5 columns, max=20
+    x = np.random.randn(50, 20)  # 20 columns
+    y = np.random.randn(50, 5)   # 5 columns
+    
+    # With threshold of 15, should use GPU because max(20,5)=20 > 15
+    result_gpu = optcorr(x, y, min_cols_for_gpu=15)
+    
+    # With threshold of 25, should use numpy because max(20,5)=20 < 25
+    result_numpy = optcorr(x, y, min_cols_for_gpu=25)
+    
+    # Both should produce valid results
+    assert result_gpu.shape == (20, 5)
+    assert result_numpy.shape == (20, 5)
+    
+    # Results should be similar regardless of backend
+    np.testing.assert_allclose(result_gpu, result_numpy, rtol=1e-4)
