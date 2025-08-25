@@ -4,7 +4,7 @@ Efficient columnwise correlation computation using Einstein summation notation w
 
 This module was primarily written as an example for by [Better Code, Better Science](https://poldrack.github.io/BetterCodeBetterScience/frontmatter.html) living textbook. 
 
-All code in this project was generated using Claude Code.  See [CLAUDE.md] for details.
+All code in this project was generated using Claude Code.  See [CLAUDE.md](CLAUDE.md) for details.
 
 
 ## Features
